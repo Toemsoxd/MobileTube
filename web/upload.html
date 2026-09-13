@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MobileTube - Upload</title>
+</head>
+<body>
+    <h1>MobileTube</h1>
+    <h2>Upload video</h2>
+
+    <p>This page is for PC users only.</p>
+    <p>Mobile devices should use MobileTube to browse and watch videos.</p>
+
+    <form method="post" action="/upload" enctype="multipart/form-data">
+        <p>
+            <label for="video">Video:</label><br>
+            <input id="video" name="video" type="file" accept="video/*">
+        </p>
+        <p>
+            <label for="title">Title:</label><br>
+            <input id="title" name="title" type="text" maxlength="120">
+        </p>
+        <p>
+            <button type="submit">Upload</button>
+        </p>
+    </form>
+</body>
+</html>
