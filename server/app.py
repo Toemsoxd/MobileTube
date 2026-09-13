@@ -1,5 +1,6 @@
+import os
 from pathlib import Path
-from flask import Flask, abort, redirect, request, send_from_directory
+from flask import Flask, abort, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -39,6 +40,11 @@ def web_files(filename: str):
     return send_from_directory(WEB, filename)
 
 
+@app.get("/vids/<path:filename>")
+def videos(filename: str):
+    return send_from_directory(VIDS, filename)
+
+
 @app.post("/upload")
 def upload():
     # Uploads are intentionally restricted to desktop browsers.
@@ -72,4 +78,8 @@ def too_large(_error):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "8000")),
+        debug=True,
+    )
