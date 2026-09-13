@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from flask import Flask, abort, request, send_from_directory
+from flask import Flask, abort, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,7 +42,18 @@ def web_files(filename: str):
 
 @app.get("/vids/<path:filename>")
 def videos(filename: str):
-    return send_from_directory(VIDS, filename)
+    # Serve 3GP with its standard video MIME type so old browsers can
+    # hand the URL to the device's media/streaming player.
+    requested = VIDS / filename
+    if requested.suffix.lower() != ".3gp" or not requested.is_file():
+        abort(404)
+
+    return send_file(
+        requested,
+        mimetype="video/3gpp",
+        as_attachment=False,
+        conditional=True,
+    )
 
 
 @app.post("/upload")
