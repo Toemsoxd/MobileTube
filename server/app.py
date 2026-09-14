@@ -1,5 +1,8 @@
+import html
 import os
 from pathlib import Path
+from urllib.parse import quote
+
 from flask import Flask, abort, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
@@ -30,9 +33,60 @@ def is_mobile_user_agent(user_agent: str) -> bool:
     return any(marker in ua for marker in mobile_markers)
 
 
+def video_title(filename: str) -> str:
+    """Turn a video filename into a readable title."""
+    title = Path(filename).stem
+    title = title.replace("+", " ").replace("_", " ").replace("-", " ")
+    return " ".join(title.split())
+
+
+def render_index() -> str:
+    """Build the video list directly from the current contents of vids/."""
+    videos = sorted(
+        (path for path in VIDS.iterdir() if path.is_file() and path.suffix.lower() == ".3gp"),
+        key=lambda path: path.name.lower(),
+    )
+
+    items = []
+    for video in videos:
+        filename = video.name
+        href = "/vids/" + quote(filename)
+        title = html.escape(video_title(filename))
+        items.append(f'<p><a href="{href}">{title}</a></p>')
+
+    if not items:
+        video_list = "<p>No videos available.</p>"
+    else:
+        video_list = "\n".join(items)
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>MobileTube</title>
+</head>
+<body>
+    <h1>MobileTube</h1>
+    <p>Simple video platform for old mobile devices.</p>
+
+    <hr>
+
+    <h2>Videos</h2>
+    {video_list}
+
+    <hr>
+
+    <p><a href="/web/upload.html">PC upload</a></p>
+</body>
+</html>
+"""
+
+
 @app.get("/")
 def index():
-    return send_from_directory(ROOT, "index.html")
+    # The catalog is generated from vids/ on every request. Adding or removing
+    # a .3gp file therefore changes the video list automatically.
+    return render_index()
 
 
 @app.get("/web/<path:filename>")
