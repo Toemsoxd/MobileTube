@@ -147,6 +147,9 @@ def upload():
     if not filename:
         abort(400, description="Invalid filename.")
 
+    if Path(filename).suffix.lower() != ".3gp":
+        abort(400, description="Only 3GP videos are supported.")
+
     destination = VIDS / filename
     if destination.exists():
         stem = destination.stem
