@@ -1,5 +1,6 @@
 import html
 import os
+import re
 from pathlib import Path
 from urllib.parse import quote
 
@@ -34,7 +35,10 @@ def video_title(filename: str) -> str:
 
 
 def rtsp_path(filename: str) -> str:
-    return Path(filename).stem
+    """Create the same stable RTSP slug used by the static generator."""
+    title = video_title(filename).lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", title).strip("-")
+    return slug or "video"
 
 
 def render_index() -> str:
@@ -45,9 +49,8 @@ def render_index() -> str:
 
     items = []
     for video in videos:
-        filename = video.name
-        stream_url = f"{RTSP_BASE_URL}/{quote(rtsp_path(filename))}"
-        title = html.escape(video_title(filename))
+        stream_url = f"{RTSP_BASE_URL}/{quote(rtsp_path(video.name))}"
+        title = html.escape(video_title(video.name))
         items.append(f'''<div class="video-item">
     <div class="video-thumb">VIDEO</div>
     <div class="video-info">
