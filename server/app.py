@@ -14,6 +14,7 @@ VIDS.mkdir(exist_ok=True)
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024  # 1 GB
+RTSP_BASE_URL = os.environ.get("RTSP_BASE_URL", "rtsp://localhost:8554").rstrip("/")
 
 
 def is_mobile_user_agent(user_agent: str) -> bool:
@@ -32,6 +33,10 @@ def video_title(filename: str) -> str:
     return " ".join(title.split())
 
 
+def rtsp_path(filename: str) -> str:
+    return Path(filename).stem
+
+
 def render_index() -> str:
     videos = sorted(
         (path for path in VIDS.iterdir() if path.is_file() and path.suffix.lower() == ".3gp"),
@@ -41,13 +46,13 @@ def render_index() -> str:
     items = []
     for video in videos:
         filename = video.name
-        href = "/vids/" + quote(filename)
+        stream_url = f"{RTSP_BASE_URL}/{quote(rtsp_path(filename))}"
         title = html.escape(video_title(filename))
         items.append(f'''<div class="video-item">
     <div class="video-thumb">VIDEO</div>
     <div class="video-info">
-        <div class="video-title"><a href="{href}">{title}</a></div>
-        <div class="video-meta">3GP video &bull; Legacy mobile format</div>
+        <div class="video-title"><a href="{html.escape(stream_url, quote=True)}">{title}</a></div>
+        <div class="video-meta">RTSP &bull; 3GP video &bull; Legacy mobile format</div>
     </div>
 </div>''')
 
