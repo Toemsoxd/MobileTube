@@ -3,19 +3,46 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MobileTube</title>
+    <title>MobileTube - YouTube on the go!</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>MobileTube</h1>
-    <p>Simple video platform for old mobile devices.</p>
+<div id="page">
+    <div id="masthead">
+        <div id="topbar"></div>
+        <div id="header">
+            <a id="brand" href="index.html"><img src="MobileTubeLog.png" alt="MobileTube"></a>
+            <span id="tagline">YouTube on the go!</span>
+            <div id="nav">
+                <a href="index.html">Home</a>
+                <a href="#videos">Videos</a>
+                <a href="web/upload.html">Upload from PC</a>
+            </div>
+        </div>
+    </div>
 
-    <hr>
+    <div id="content">
+        <h1>MobileTube</h1>
+        <p id="intro">Watch videos on the go, even on older mobile devices.</p>
 
-    <h2>Videos</h2>
-    <p><a href="/vids/Super-Mario-Bros-in-First-Person.3gp">Super Mario Bros in First Person</a></p>
+        <h2 id="videos">Videos</h2>
+        <div class="video-list">
+            <div class="video-item">
+                <div class="video-thumb">VIDEO</div>
+                <div class="video-info">
+                    <div class="video-title">
+                        <a href="vids/Super%2BMario%2BBros%2Bin%2BFirst%2BPerson.3gp">Super Mario Bros in First Person</a>
+                    </div>
+                    <div class="video-meta">3GP video &bull; Legacy mobile format</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <hr>
-
-    <p><a href="web/upload.html">PC upload</a></p>
+    <div id="footer">
+        MobileTube &mdash; YouTube on the go! &nbsp;|&nbsp;
+        <a href="web/upload.html">Upload a video from PC</a>
+    </div>
+</div>
 </body>
 </html>
