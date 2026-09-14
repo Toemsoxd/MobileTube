@@ -1,5 +1,6 @@
 """Generate the static MobileTube homepage for simple hosting providers."""
 
+import argparse
 import html
 from pathlib import Path
 from urllib.parse import quote
@@ -15,7 +16,22 @@ def title_for(filename: str) -> str:
     return " ".join(title.split())
 
 
+def rtsp_path(filename: str) -> str:
+    # Keep the RTSP path simple and stable. The RTSP server can map this
+    # path to the corresponding file in its media library.
+    return Path(filename).stem
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate the static MobileTube homepage")
+    parser.add_argument(
+        "--rtsp-base",
+        default="rtsp://localhost:8554",
+        help="Base RTSP URL, for example rtsp://stream.example.com:8554",
+    )
+    args = parser.parse_args()
+    rtsp_base = args.rtsp_base.rstrip("/")
+
     videos = sorted(
         (p for p in VIDS.iterdir() if p.is_file() and p.suffix.lower() == ".3gp"),
         key=lambda p: p.name.lower(),
@@ -24,13 +40,13 @@ def main() -> None:
     if videos:
         items = []
         for video in videos:
-            filename = quote(video.name)
             title = html.escape(title_for(video.name))
+            stream_url = f"{rtsp_base}/{quote(rtsp_path(video.name))}"
             items.append(f'''<div class="video-item">
     <div class="video-thumb">VIDEO</div>
     <div class="video-info">
-        <div class="video-title"><a href="vids/{filename}">{title}</a></div>
-        <div class="video-meta">3GP video &bull; Legacy mobile format</div>
+        <div class="video-title"><a href="{html.escape(stream_url, quote=True)}">{title}</a></div>
+        <div class="video-meta">RTSP &bull; 3GP video &bull; Legacy mobile format</div>
     </div>
 </div>''')
         video_list = "\n".join(items)
