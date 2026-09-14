@@ -2,6 +2,7 @@
 
 import argparse
 import html
+import re
 from pathlib import Path
 from urllib.parse import quote
 
@@ -17,9 +18,10 @@ def title_for(filename: str) -> str:
 
 
 def rtsp_path(filename: str) -> str:
-    # Keep the RTSP path simple and stable. The RTSP server can map this
-    # path to the corresponding file in its media library.
-    return Path(filename).stem
+    """Create a stable, simple RTSP path from a video filename."""
+    title = title_for(filename).lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", title).strip("-")
+    return slug or "video"
 
 
 def main() -> None:
