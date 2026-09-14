@@ -19,29 +19,20 @@ app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 1024  # 1 GB
 def is_mobile_user_agent(user_agent: str) -> bool:
     ua = user_agent.lower()
     mobile_markers = (
-        "android",
-        "iphone",
-        "ipad",
-        "ipod",
-        "windows phone",
-        "windows ce",
-        "iemobile",
-        "opera mini",
-        "opera mobi",
+        "android", "iphone", "ipad", "ipod", "windows phone",
+        "windows ce", "iemobile", "opera mini", "opera mobi",
         "mobile safari",
     )
     return any(marker in ua for marker in mobile_markers)
 
 
 def video_title(filename: str) -> str:
-    """Turn a video filename into a readable title."""
     title = Path(filename).stem
     title = title.replace("+", " ").replace("_", " ").replace("-", " ")
     return " ".join(title.split())
 
 
 def render_index() -> str:
-    """Build the video list directly from the current contents of vids/."""
     videos = sorted(
         (path for path in VIDS.iterdir() if path.is_file() and path.suffix.lower() == ".3gp"),
         key=lambda path: path.name.lower(),
@@ -52,41 +43,68 @@ def render_index() -> str:
         filename = video.name
         href = "/vids/" + quote(filename)
         title = html.escape(video_title(filename))
-        items.append(f'<p><a href="{href}">{title}</a></p>')
+        items.append(f'''<div class="video-item">
+    <div class="video-thumb">VIDEO</div>
+    <div class="video-info">
+        <div class="video-title"><a href="{href}">{title}</a></div>
+        <div class="video-meta">3GP video &bull; Legacy mobile format</div>
+    </div>
+</div>''')
 
-    if not items:
-        video_list = "<p>No videos available.</p>"
-    else:
-        video_list = "\n".join(items)
+    video_list = "\n".join(items) if items else '<p>No videos available.</p>'
 
-    return f"""<!doctype html>
+    return f'''<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>MobileTube</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MobileTube - YouTube on the go!</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>MobileTube</h1>
-    <p>Simple video platform for old mobile devices.</p>
-
-    <hr>
-
-    <h2>Videos</h2>
-    {video_list}
-
-    <hr>
-
-    <p><a href="/web/upload.html">PC upload</a></p>
+<div id="page">
+    <div id="masthead">
+        <div id="topbar"></div>
+        <div id="header">
+            <a id="brand" href="/"><img src="/MobileTubeLog.png" alt="MobileTube"></a>
+            <span id="tagline">YouTube on the go!</span>
+            <div id="nav">
+                <a href="/">Home</a>
+                <a href="#videos">Videos</a>
+                <a href="/web/upload.html">Upload from PC</a>
+            </div>
+        </div>
+    </div>
+    <div id="content">
+        <h1>MobileTube</h1>
+        <p id="intro">Watch videos on the go, even on older mobile devices.</p>
+        <h2 id="videos">Videos</h2>
+        <div class="video-list">
+            {video_list}
+        </div>
+    </div>
+    <div id="footer">
+        MobileTube &mdash; YouTube on the go! &nbsp;|&nbsp;
+        <a href="/web/upload.html">Upload a video from PC</a>
+    </div>
+</div>
 </body>
-</html>
-"""
+</html>'''
 
 
 @app.get("/")
 def index():
-    # The catalog is generated from vids/ on every request. Adding or removing
-    # a .3gp file therefore changes the video list automatically.
     return render_index()
+
+
+@app.get("/style.css")
+def stylesheet():
+    return send_from_directory(ROOT, "style.css", mimetype="text/css")
+
+
+@app.get("/MobileTubeLog.png")
+def logo():
+    return send_from_directory(ROOT, "MobileTubeLog.png")
 
 
 @app.get("/web/<path:filename>")
@@ -96,8 +114,6 @@ def web_files(filename: str):
 
 @app.get("/vids/<path:filename>")
 def videos(filename: str):
-    # Serve 3GP with its standard video MIME type so old browsers can
-    # hand the URL to the device's media/streaming player.
     requested = VIDS / filename
     if requested.suffix.lower() != ".3gp" or not requested.is_file():
         abort(404)
@@ -112,7 +128,6 @@ def videos(filename: str):
 
 @app.post("/upload")
 def upload():
-    # Uploads are intentionally restricted to desktop browsers.
     if is_mobile_user_agent(request.headers.get("User-Agent", "")):
         abort(403, description="Mobile uploads are disabled. Please use a PC.")
 
@@ -143,8 +158,4 @@ def too_large(_error):
 
 
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", "8000")),
-        debug=True,
-    )
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8000")), debug=True)
