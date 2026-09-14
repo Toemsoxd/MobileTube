@@ -1,9 +1,7 @@
 # MobileTube RTSP test server configuration.
 #
-# This file is intended for a machine/VPS that can run MediaMTX and FFmpeg.
-# KESUG can host the web frontend, but a shared web host cannot normally run
-# a custom RTSP daemon on TCP/8554. Set the public RTSP hostname/port in the
-# generated MobileTube index with tools/generate_static.py.
+# Run MediaMTX from the repository root so the relative media path resolves.
+# KESUG hosts the web frontend; the RTSP daemon runs on a separate server/VPS.
 
 rtsp: true
 rtspTransports: [tcp]
