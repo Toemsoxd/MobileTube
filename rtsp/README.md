@@ -1,31 +1,22 @@
 # MobileTube RTSP
 
-MobileTube opens videos as RTSP links instead of sending the phone to a normal HTTP video file.
+MobileTube uses RTSP as the bridge between the lightweight 2009-style website and Windows Mobile Streaming Media.
 
-The web frontend can live on KESUG or another shared web host, while the RTSP service runs on a machine/VPS that can expose an RTSP port.
+Architecture:
 
-## Test server
+YouTube -> Invidious API -> FFmpeg -> H.263 + AMR-NB at 240p -> MediaMTX -> RTSP -> Windows Mobile
 
-The repository includes `mediamtx.yml` for the first test video. It uses MediaMTX as the RTSP server and FFmpeg to publish the existing 3GP file only when a client requests the stream.
+The default video height is 240 pixels. It does NOT force 4:3; FFmpeg preserves the source aspect ratio.
 
-MediaMTX documents this `runOnDemand` pattern and supports H.263 as an MPEG-4 video codec. The RTSP server normally listens on TCP port 8554. See the upstream MediaMTX documentation for deployment details.
+Configuration:
+- INVIDIOUS_API=https://YOUR-INSTANCE/api/v1
+- MOBILETUBE_HEIGHT=240
+- MOBILETUBE_FPS=15
+- MOBILETUBE_VIDEO_BITRATE=180k
+- RTSP_TARGET=rtsp://127.0.0.1:8554
 
-## Generate the website with the RTSP server address
+Run MediaMTX with rtsp/mediamtx.yml. A request for rtsp://HOST:8554/<youtube-video-id> starts FFmpeg on demand.
 
-From the repository root:
+The prototype selects a progressive Invidious format (audio + video), scales it to 240 pixels high, and publishes H.263/AMR-NB over RTSP.
 
-```text
-python tools/generate_static.py --rtsp-base rtsp://YOUR-RTSP-SERVER:8554
-```
-
-The generated homepage will contain links such as:
-
-```text
-rtsp://YOUR-RTSP-SERVER:8554/super-mario-bros-in-first-person
-```
-
-Opera Mobile 10 can then hand the RTSP link to the phone's native Streaming Media application.
-
-## Important hosting note
-
-KESUG provides normal web-hosting features such as PHP/MySQL, but that does not mean a user can run an arbitrary long-lived RTSP daemon or open TCP/8554. The RTSP endpoint must therefore be verified separately before calling the deployment complete.
+H.263 and AMR-NB are intentional legacy targets; actual playback still needs validation on the HTC S730 Streaming Media player.
