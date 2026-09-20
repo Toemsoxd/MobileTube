@@ -104,7 +104,7 @@ The existing `vids/` upload path remains available for locally stored 3GP files.
 
 ## RTSP deployment
 
-MediaMTX normally listens on TCP port 8554. Its `runOnDemand` hook starts FFmpeg only when a client requests a path, and MediaMTX exposes `$MTX_PATH` and `$RTSP_PORT` to the hook. citeturn1search0turn1search1
+MediaMTX normally listens on TCP port 8554. Its `runOnDemand` hook starts FFmpeg only when a client requests a path, and MediaMTX exposes `$MTX_PATH` and `$RTSP_PORT` to the hook.
 
 Install:
 
