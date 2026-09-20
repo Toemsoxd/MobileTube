@@ -1,7 +1,13 @@
-# MobileTube RTSP test server configuration.
+# MobileTube RTSP server.
 #
-# Run MediaMTX from the repository root so the relative media path resolves.
-# KESUG hosts the web frontend; the RTSP daemon runs on a separate server/VPS.
+# The web frontend can stay on a static host. MediaMTX and FFmpeg run on a
+# separate VPS/machine and create each YouTube stream only when requested.
+#
+# A client opens:
+#   rtsp://YOUR-SERVER:8554/yt-VIDEO_ID
+#
+# The stream helper resolves VIDEO_ID through Invidious and transcodes it to
+# a legacy-friendly 240p H.263 + AMR-NB RTSP stream.
 
 rtsp: true
 rtspTransports: [tcp]
@@ -9,6 +15,8 @@ rtspEncryption: "no"
 rtspAddress: :8554
 
 paths:
-  super-mario-bros-in-first-person:
-    runOnDemand: ffmpeg -re -i "vids/Super+Mario+Bros+in+First+Person.3gp" -c copy -f rtsp rtsp://127.0.0.1:$RTSP_PORT/$MTX_PATH
-    runOnDemandRestart: yes
+  "~^yt-[A-Za-z0-9_-]{11}$":
+    runOnDemand: python3 tools/stream_youtube.py
+    runOnDemandRestart: no
+    runOnDemandStartTimeout: 15s
+    runOnDemandCloseAfter: 10s
